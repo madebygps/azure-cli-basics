@@ -24,22 +24,92 @@ If a browser is not available for you to sign in, use `az login --use-device-cod
 
 ## The Anatomy of an Azure CLI command
 
-![me](command-diagram.png)
+![command-diagram](command-diagram.png)
 
 - **Prefix:** All CLIs have prefixes. Azure's is `az`.
 - **Group:** Commands are organized into command groups. Each group represents an Azure service.
 - **Subgroup:** If a service has various types or services, it will have a or various subgroups.
 - **Command:** An operation on the service.
--- **Parameters:** Values you provide the command for context. Parameters can be required, optional, and/or global.
+- **Arguments:** Values you provide the command for context. Arguments can be required, optional, and/or global. The words arguments and parameters are often used interchangeably.
 
 ## Finding commands
 
-Azure CLI commands are organized as commands of groups. Each group represents an Azure service, and commands operate on that service.
+To search for commands, use `az find`. For example, to search for command names containing secret, use the following command:
 
-To search for commands, use az find. For example, to search for command names containing secret, use the following command:
+```sh 
+az find secret
+```
 
-`az find group`
+## Set your subscription
 
+It's important to set the CLI to work within the subscription you want to. When you login, a default subscription is set for you but you can change that using the `az account` commands.
+
+- `az account set --subscription {subscription-name}`: Will set the subscription. You must provide the name.
+- `az account list`: Will give you a list of available subscriptions.
+- `az account show`: will display the current set subscription
+
+## az config and az init
+
+The Azure CLI allows for user configuration for settings such as logging, data collection, and default argument values. The CLI offers a convenience command for managing some defaults, az config, and an interactive option through az init.
+
+az init is an extension that is intended to quickly set up global configurations suitable for your current environment. It adjusts the same configuration file as az config and is meant to help simplify the configuration process whereas az config allows you to go a bit deeper. 
+```sh
+az init
+```
+
+You can set defaults for the CLI with the az config set command. This command takes a space-separated list of key=value pairs as an argument. The provided values are used by the Azure CLI in place of required arguments.
+
+```sh
+az config set defaults.location=eastus2 defaults.group=MyResourceGroup
+```
+
+## Globally available arguments
+
+There are some arguments that are available for every Azure CLI command.
+
+- `--help` prints CLI reference information about commands and their arguments and lists available subgroups and commands.
+- `--output` changes the output format. The available output formats are json, jsonc (colorized JSON), tsv (Tab-Separated Values), table (human-readable ASCII tables), and yaml. By default the CLI outputs json.
+- `--query` uses the JMESPath query language to filter the output returned from Azure services. 
+- `--verbose` prints information about resources created in Azure during an operation, and other useful information.
+- `--debug` prints even more information about CLI operations, used for debugging purposes. If you find a bug, provide output generated with the --debug flag on when submitting a bug report.
+
+## Interactive mode
+
+You can use Azure CLI in interactive mode by running the az interactive command. The Azure CLI interactive mode places you in an interactive shell with auto-completion, command descriptions, and examples.
+
+![me](interactive.png)
+
+## Persisted Parameters
+
+Azure CLI offers persisted parameters that enable you to store parameter values for continued use. Persisted parameter values are stored in the working directory of the Azure storage account used by Azure Cloud Shell. If you are using a local install of the Azure CLI, values are stored in the working directory on your machine.
+
+```sh
+# Turn on persisted parameters
+az config param-persist on
+
+# Create a storage account
+az storage account create --name sa1fortutorial
+
+# See that storage_account_name has been added to persisted parameters
+az config param-persist show
+
+# Turn persisted parameters off
+az config param-persist off
+
+# See that your persisted parameters still exist
+az config param-persist show
+
+# Try to create a new resource relying on persisted parameters and receive error "...the following arguments are required:..."
+az storage account create --name sa1fortutorial --sku Standard_LRS
+```
+
+## Querying 
+
+-	Querying with JMESPath
+
+## Formatting
+
+## Upload, to Azure Storage  
 
 ## More resources
 https://github.com/Azure/azure-cli

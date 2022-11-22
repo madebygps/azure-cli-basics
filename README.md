@@ -22,6 +22,14 @@ Before using any Azure CLI commands with a local install, you need to sign in wi
 
 If a browser is not available for you to sign in, use `az login --use-device-code`
 
+## Set your subscription
+
+It's important to set the CLI to work within the subscription you want to. When you login, a default subscription is set for you but you can change that using the `az account` commands.
+
+- `az account set --subscription {subscription-name}`: Will set the subscription. You must provide the name.
+- `az account list`: Will give you a list of available subscriptions.
+- `az account show`: will display the current set subscription
+
 ## The Anatomy of an Azure CLI command
 
 ![command-diagram](command-diagram.png)
@@ -31,22 +39,6 @@ If a browser is not available for you to sign in, use `az login --use-device-cod
 - **Subgroup:** If a service has various types or services, it will have a or various subgroups.
 - **Command:** An operation on the service.
 - **Arguments:** Values you provide the command for context. Arguments can be required, optional, and/or global. The words arguments and parameters are often used interchangeably.
-
-## Finding commands
-
-To search for commands, use `az find`. For example, to search for command names containing secret, use the following command:
-
-```sh 
-az find secret
-```
-
-## Set your subscription
-
-It's important to set the CLI to work within the subscription you want to. When you login, a default subscription is set for you but you can change that using the `az account` commands.
-
-- `az account set --subscription {subscription-name}`: Will set the subscription. You must provide the name.
-- `az account list`: Will give you a list of available subscriptions.
-- `az account show`: will display the current set subscription
 
 ## az config and az init
 
@@ -61,6 +53,14 @@ You can set defaults for the CLI with the az config set command. This command ta
 
 ```sh
 az config set defaults.location=eastus2 defaults.group=MyResourceGroup
+```
+
+## Finding commands and help
+
+To search for commands, use `az find`. For example, to search for command names containing secret, use the following command:
+
+```sh 
+az find secret
 ```
 
 ## Globally available arguments
@@ -147,8 +147,6 @@ The table format prints output as an ASCII table, making it easy to read and sca
 az vm show --resource-group QueryDemo --name TestVM --query "{objectID:id}" --output table
 ```
 
-## Upload, to Azure Storage  
-
 ## More resources
 https://github.com/Azure/azure-cli
-https://learn.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest
+https://learn.microsoft.com/cli/azure/reference-index?view=azure-cli-latest

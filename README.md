@@ -105,9 +105,47 @@ az storage account create --name sa1fortutorial --sku Standard_LRS
 
 ## Querying 
 
--	Querying with JMESPath
+The Azure CLI uses the `--query` parameter to execute a JMESPath query on the results of commands. JMESPath is a query language for JSON, giving you the ability to select and modify data from CLI output.
+
+The `--query` parameter is supported by all commands in the Azure CLI.
+
+Even when using an output format other than JSON, CLI command results are first treated as JSON for queries. CLI results are either a JSON array or dictionary. Arrays are sequences of objects that can be indexed, and dictionaries are unordered objects accessed with keys. Commands that could return more than one object return an array, and commands that always return only a single object return a dictionary.
+
+### A few examples:
+
+``` sh
+# The following command gets the SSH public keys authorized to connect to the VM by adding a query:
+
+az vm show --resource-group QueryDemo --name TestVM --query "osProfile.linuxConfiguration.ssh.publicKeys"
+```
+
+```sh
+# To get multiple values, put expressions separated by commas in square brakets [ ] (a multiselect list)
+
+az vm show --resource-group QueryDemo --name TestVM --query "[name, osProfile.adminUsername, osProfile.linuxConfiguration.ssh.publicKeys[0].keyData]"
+```
+
+```sh
+# To get a dictionary instead of an array when querying for multiple values, use the { } (multiselect hash) operator.
+
+az vm show --resource-group QueryDemo --name TestVM --query "{VMName:name, admin:osProfile.adminUsername, sshKey:osProfile.linuxConfiguration.ssh.publicKeys[0].keyData}"
+```
 
 ## Formatting
+
+### TSV output format
+The tsv output format returns tab- and newline-separated values without additional formatting, keys, or other symbols. This is useful when the output is consumed by another command.
+
+```sh
+USER=$(az vm show --resource-group QueryDemo --name TestVM --query "osProfile.adminUsername")
+echo $USER
+```
+
+### Table output format
+The table format prints output as an ASCII table, making it easy to read and scan. Not all fields are included in the table so this format is best used as a human-searchable overview of data. Fields that are not included in the table can still be filtered for as part of a query.
+```sh
+az vm show --resource-group QueryDemo --name TestVM --query "{objectID:id}" --output table
+```
 
 ## Upload, to Azure Storage  
 

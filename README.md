@@ -84,24 +84,33 @@ There are some arguments that are available for every Azure CLI command.
 Azure CLI offers persisted parameters that enable you to store parameter values for continued use. Persisted parameter values are stored in the working directory of the Azure storage account used by Azure Cloud Shell. If you are using a local install of the Azure CLI, values are stored in the working directory on your machine.
 
 ```sh
-# Turn on persisted parameters
+# Reminder: function app and storage account names must be unique.
+
+# turn persisted parameters on
 az config param-persist on
 
-# Create a storage account
-az storage account create --name sa1fortutorial
+# Create a resource group which will store "resource group" and "location" in persisted parameter.
+az group create --name RGlocalContext --location westeurope
 
-# See that storage_account_name has been added to persisted parameters
+# Create an Azure storage account omitting location and resource group.
+az storage account create \
+  --name sa1localcontext \
+  --sku Standard_LRS
+
+# Create a serverless function app in the resource group omitting storage account and resource group.
+az functionapp create \
+  --name FAlocalContext \
+  --consumption-plan-location westeurope \
+  --functions-version 2
+
+# See the stored parameter values
 az config param-persist show
-
-# Turn persisted parameters off
-az config param-persist off
-
-# See that your persisted parameters still exist
-az config param-persist show
-
-# Try to create a new resource relying on persisted parameters and receive error "...the following arguments are required:..."
-az storage account create --name sa1fortutorial --sku Standard_LRS
 ```
+
+| Reference                | Scope                                          | Set                                                       | Use                                                                            |   |
+|--------------------------|------------------------------------------------|-----------------------------------------------------------|--------------------------------------------------------------------------------|---|
+| az config set defaults.= | Scoped globally across the CLI                 | Set explicitly using az config set defaults.=             | Use for settings such as logging, data collection, and default argument values |   |
+| az config param-persist  | Scoped locally to a specific working directory | Set automatically once persisted parameters are turned on | Use for individual workload sequential commands.                               |   |
 
 ## Querying 
 
@@ -116,19 +125,32 @@ Even when using an output format other than JSON, CLI command results are first 
 ``` sh
 # The following command gets the SSH public keys authorized to connect to the VM by adding a query:
 
-az vm show --resource-group QueryDemo --name TestVM --query "osProfile.linuxConfiguration.ssh.publicKeys"
+az vm show --resource-group rg-demo1 --name vm1 --query "osProfile.linuxConfiguration.ssh.publicKeys"
 ```
 
 ```sh
-# To get multiple values, put expressions separated by commas in square brakets [ ] (a multiselect list)
+# To get multiple values, put expressions separated by commas in square brackets [ ] (a multiselect list)
 
-az vm show --resource-group QueryDemo --name TestVM --query "[name, osProfile.adminUsername, osProfile.linuxConfiguration.ssh.publicKeys[0].keyData]"
+az vm show --resource-group rg-demo1 --name TestVM --query "[name, osProfile.adminUsername, osProfile.linuxConfiguration.ssh.publicKeys[0].keyData]"
 ```
 
 ```sh
 # To get a dictionary instead of an array when querying for multiple values, use the { } (multiselect hash) operator.
 
-az vm show --resource-group QueryDemo --name TestVM --query "{VMName:name, admin:osProfile.adminUsername, sshKey:osProfile.linuxConfiguration.ssh.publicKeys[0].keyData}"
+az vm show --resource-group rg-demo1 --name TestVM --query "{VMName:name, admin:osProfile.adminUsername, sshKey:osProfile.linuxConfiguration.ssh.publicKeys[0].keyData}"
+```
+
+```sh
+# To access the properties of elements in an array, you do one of two operations: flattening or filtering. Flattening an array is done with the [] JMESPath operator. All expressions after the [] operator are applied to each element in the current array. If [] appears at the start of the query, it flattens the CLI command result.
+
+az vm list --resource-group rg-demo1 --query "[].{Name:name, OS:storageProfile.osDisk.osType, admin:osProfile.adminUsername}"
+```
+
+```sh
+
+# We can also use filters
+
+az vm list --resource-group rg-demo1 --query "[?storageProfile.osDisk.osType=='Linux'].{Name:name,  admin:osProfile.adminUsername}" --output table
 ```
 
 ## Formatting
@@ -148,5 +170,5 @@ az vm show --resource-group QueryDemo --name TestVM --query "{objectID:id}" --ou
 ```
 
 ## More resources
-https://github.com/Azure/azure-cli
-https://learn.microsoft.com/cli/azure/reference-index?view=azure-cli-latest
+- https://github.com/Azure/azure-cli
+- https://learn.microsoft.com/cli/azure/reference-index?view=azure-cli-latest

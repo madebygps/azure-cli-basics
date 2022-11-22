@@ -55,6 +55,12 @@ You can set defaults for the CLI with the az config set command. This command ta
 az config set defaults.location=eastus2 defaults.group=MyResourceGroup
 ```
 
+## Interactive mode
+
+You can use Azure CLI in interactive mode by running the az interactive command. The Azure CLI interactive mode places you in an interactive shell with auto-completion, command descriptions, and examples.
+
+![me](interactive.png)
+
 ## Finding commands and help
 
 To search for commands, use `az find`. For example, to search for command names containing secret, use the following command:
@@ -72,12 +78,6 @@ There are some arguments that are available for every Azure CLI command.
 - `--query` uses the JMESPath query language to filter the output returned from Azure services. 
 - `--verbose` prints information about resources created in Azure during an operation, and other useful information.
 - `--debug` prints even more information about CLI operations, used for debugging purposes. If you find a bug, provide output generated with the --debug flag on when submitting a bug report.
-
-## Interactive mode
-
-You can use Azure CLI in interactive mode by running the az interactive command. The Azure CLI interactive mode places you in an interactive shell with auto-completion, command descriptions, and examples.
-
-![me](interactive.png)
 
 ## Persisted Parameters
 

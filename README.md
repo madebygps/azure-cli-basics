@@ -291,7 +291,8 @@ az group list -o tsv | grep $resourceGroup -q || az group create --name $resourc
 # Define an array
 rgArray=("rg-devenvironment" "rg-testingenvironment" "rg-stagingenvironment")
 
-for i in "${rgArray[@]}; do
+for i in "${rgArray[@]}" 
+do
     az group create -g $i -l eastus2
 done
 

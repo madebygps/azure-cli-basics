@@ -1,8 +1,8 @@
-# azure-cli-basics
+# Azure CLI Basics
 
 ## What's the advantage of using an Azure command-line tool?
 
-Azure runs on automation. Every action inside the portal translates to code being executed to read, create, modify, or delete resources. Azure command-line tools automate routine operations, standardize database failovers, and pull data that provide powerful insight. 
+Azure runs on automation. Every action inside the portal translates to code being executed to read, create, modify, or delete resources. Azure command-line tools automate routine operations, standardize database failover, and pull data that provide powerful insight. 
 
 ## Chose the right Azure Command Line Tool
 
@@ -172,3 +172,131 @@ az vm show --resource-group QueryDemo --name TestVM --query "{objectID:id}" --ou
 ## More resources
 - https://github.com/Azure/azure-cli
 - https://learn.microsoft.com/cli/azure/reference-index?view=azure-cli-latest
+
+# Azure CLI and Bash
+
+## Formatting
+
+```sh
+az account show
+az account show --output json # JSON is the default format
+
+az account show --output yaml
+
+az account show --query name # Querying a single value
+az account show --query name -o tsv # Removes quotation marks from the output
+
+az account show --query [name,user.name] # return multiple values
+az account show --query [name,user.name] -o table # return multiple values as a table
+
+az account show --query "{SubscriptionName: name, UserName: user.name}" # Rename the values returned
+az account show --query "{SubscriptionName: name, UserName: user.name}" -o table # Rename the values returned in a table
+```
+
+## Querying boolean values 
+
+```sh
+
+az account list --query "[?isDefault].{SubscriptionName: name, SubscriptionId: id}" -o table # Returns the name and id of the default subscription as a table with friendly names
+
+az account list --query "[?isDefault == \`false\`].name" -o table # Returns all non-default subscriptions, if any, as a table
+
+subscriptionId="$(az account list --query "[?isDefault].name" -o tsv)" # Captures the subscription name as a variable.
+
+echo $subscriptionId # Returns the contents of the variable.
+
+az account list --query "[? contains(name, 'Microsoft')].name" -o tsv # Returns the subscription id of a non-default subscription containing the substring 'Microsoft'
+
+subscriptionId=$(az account list --query "[? contains(name, 'Visual')].id" -o tsv)
+
+ # Captures the subscription id as a variable. 
+az account set -s $subscriptionId # Sets the current active subscription
+
+```
+
+## Creating objects using variables and randomization
+
+### Setting a random value 
+
+```sh
+
+let "randomIdentifier=$RANDOM*$RANDOM"
+
+```
+
+### Spaces and quotation marks
+
+Use quote marks to tell the Bash shell to ignore special characters. Use double quotes to parse them. 
+
+```sh
+
+resourceGroup='learn-bash-$randomIdentifier'
+echo $resourceGroup # The $ is ignored in the creation of the $resourceGroup variable
+
+resourceGroup="learn-bash-$randomIdentifier"
+echo $resourceGroup # The $randomIdentifier is evaluated when defining the $resourceGroup variable
+
+location="East US 2" # The space is ignored when defining the $location variable
+echo The value of the location variable is $location # The value of the $location variable is evaluated
+
+echo "The value of the location variable is $location" # The value of the $location variable is evaluated
+
+echo "The value of the location variable is \$location" # The value of the $location variable is not evaluated
+
+echo 'The value of the location variable is $location' # The value of the $location variable is not evaluated
+
+az group create --name $resourceGroup --location $location # Notice that the space in the $location variable is not ignored and the command fails as it treats the value after the space as a new command 
+
+az group create --name $resourceGroup --location "$location" # Notice that the space in the $location variable is ignored and the location argument accepts the entire string as the value
+
+```
+
+## Using If Then Else to determine if variable is null
+
+```sh
+if [ $resourceGroup != '' ]; then
+   echo $resourceGroup
+else
+   resourceGroup="learn-bash-$randomIdentifier"
+fi
+```
+
+```sh
+# create a new resource group only if one with the specified name does not already exist.
+if [ $(az group exists --name $resourceGroup) = false ]; then 
+   az group create --name $resourceGroup --location "$location" 
+else
+   echo $resourceGroup
+fi
+```
+
+```sh
+# delete an existing new resource group if one with the specified name already exists
+if [ $(az group exists --name $resourceGroup) = true ]; then 
+   az group delete --name $resourceGroup -y # --no-wait
+else
+   echo The $resourceGroup resource group does not exist
+fi
+```
+## Use grep to determine if a resource group exists, and create if it doesn't
+
+```sh
+az group list -o tsv | grep $resourceGroup -q || az group create --name $resourceGroup --location "$location"
+```
+
+## Using for loops and querying arrays
+
+```sh
+
+# Define an array
+rgArray=("rg-devenvironment" "rg-testingenvironment" "rg-stagingenvironment")
+
+for i in "${rgArray[@]}; do
+    az group create -g $i -l eastus2
+done
+
+```
+
+## Create a scaleset and loadbalancer with Bash and Azure CLI
+
+[Script can be found here](create-vm-lb.sh)

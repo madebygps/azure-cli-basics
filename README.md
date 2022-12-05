@@ -300,3 +300,5 @@ done
 ## Create a scaleset and loadbalancer with Bash and Azure CLI
 
 [Script can be found here](create-vm-lb.sh)
+
+![Script-diagram](create-vm-lb.png)
